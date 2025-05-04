@@ -1,6 +1,6 @@
 import yfinance as yf
 import pandas as pd
-import matplotlib.pyplot as plt
+import json
 
 # Your tickers and weights
 quarterly_weights = {
@@ -58,15 +58,12 @@ for i, (start, weights) in enumerate(sorted_quarters):
 # Scale the index to base value 1000
 composite = composite / composite.iloc[0] * 1000
 
-# Plot using Matplotlib (Line Chart)
-plt.figure(figsize=(12, 6))
-plt.plot(composite.index, composite, label="Hafzan Composite Index", color="blue", linewidth=1.5)
-plt.title("Hafzan Composite Index", fontsize=16)
-plt.xlabel("Date")
-plt.ylabel("Index Value")
-plt.grid(True)
-plt.legend()
-plt.tight_layout()
+# Prepare the data in a format suitable for Chart.js (dates and index values)
+dates = composite.index.strftime('%Y-%m-%d').tolist()
+values = composite.tolist()
 
-# Save the plot as an HTML file
-plt.savefig("index.html")
+# Save the data to a JSON file
+output_data = {"dates": dates, "values": values}
+
+with open('data.json', 'w') as json_file:
+    json.dump(output_data, json_file)
