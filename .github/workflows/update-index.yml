@@ -29,10 +29,10 @@ jobs:
       run: |
         python generate_chart.py
 
-    - name: Commit and push data.json
+    - name: Commit and push data.json and chart.html
       run: |
         git config --global user.name "GitHub Actions"
         git config --global user.email "github-actions@github.com"
-        git add data.json
-        git commit -m "Update data.json with the latest stock data"
+        git add data.json chart.html  # Add both data.json and chart.html
+        git commit -m "Update data.json and chart.html with the latest stock data"
         git push
