@@ -1,86 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Hafzan Composite Index</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      padding: 1rem;
+      padding: 20px;
     }
-
-    h2 {
-      text-align: center;
-    }
-
-    #chart-container {
-      width: 100%;
-      max-width: 900px;
-      margin: auto;
-    }
-
     canvas {
       width: 100% !important;
+      max-width: 100%;
       height: auto !important;
     }
   </style>
 </head>
 <body>
   <h2>Hafzan Composite Index</h2>
-  <div id="chart-container">
-    <canvas id="hafzanChart"></canvas>
-  </div>
+  <canvas id="lineChart"></canvas>
 
   <script>
-    fetch('data.json')
+    fetch("data.json")
       .then(response => response.json())
       .then(data => {
-        const ctx = document.getElementById('hafzanChart').getContext('2d');
+        const ctx = document.getElementById("lineChart").getContext("2d");
         new Chart(ctx, {
-          type: 'line',
+          type: "line",
           data: {
             labels: data.dates,
             datasets: [{
-              label: 'Hafzan Composite Index',
+              label: "Hafzan Composite Index",
               data: data.values,
-              borderColor: 'blue',
-              backgroundColor: 'rgba(0, 0, 255, 0.1)',
-              borderWidth: 2,
-              pointRadius: 0,
-              tension: 0.3,
-              fill: true,
+              fill: false,
+              borderColor: "blue",
+              tension: 0.1
             }]
           },
           options: {
             responsive: true,
             scales: {
               x: {
-                type: 'time',
-                time: {
-                  unit: 'day'
-                },
-                title: {
-                  display: true,
-                  text: 'Date'
-                }
-              },
-              y: {
-                title: {
-                  display: true,
-                  text: 'Index Value'
-                },
-                beginAtZero: false
+                ticks: { maxTicksLimit: 10 }
               }
             }
           }
         });
       })
-      .catch(error => {
-        console.error('Error loading data.json:', error);
-      });
+      .catch(err => console.error("Error loading data.json", err));
   </script>
 </body>
 </html>

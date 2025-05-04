@@ -2,7 +2,7 @@ import yfinance as yf
 import pandas as pd
 import json
 
-# Your tickers and weights
+# Define weights
 quarterly_weights = {
     "2025-04-01": {
         "PERSISTENT.NS": 0.0235,
@@ -32,38 +32,26 @@ quarterly_weights = {
 start_date = "2025-04-01"
 end_date = pd.Timestamp.today().strftime("%Y-%m-%d")
 
-# Get full ticker list
-all_tickers = set()
-for weights in quarterly_weights.values():
-    all_tickers.update(weights.keys())
+# Download price data
+tickers = list(set(k for w in quarterly_weights.values() for k in w))
+data = yf.download(tickers, start=start_date, end=end_date)["Close"].dropna()
 
-# Download data
-data = yf.download(list(all_tickers), start=start_date, end=end_date)["Close"]
-data = data.dropna()
-
-# Normalize from the start and use base value of 1000
+# Normalize and build composite
 normalized = data / data.iloc[0]
 composite = pd.Series(index=normalized.index, dtype=float)
 
-# Process quarterly weights
-sorted_quarters = sorted((pd.to_datetime(k), v) for k, v in quarterly_weights.items())
+for i, (q_start, weights) in enumerate(sorted((pd.to_datetime(k), v) for k, v in quarterly_weights.items())):
+    q_end = sorted((pd.to_datetime(k) for k in quarterly_weights.keys()))[i+1] if i+1 < len(quarterly_weights) else normalized.index[-1]
+    mask = (normalized.index >= q_start) & (normalized.index <= q_end)
+    sub_data = normalized.loc[mask, weights.keys()]
+    composite.loc[mask] = (sub_data * pd.Series(weights)).sum(axis=1)
 
-# Apply weights for each time period
-for i, (start, weights) in enumerate(sorted_quarters):
-    end = sorted_quarters[i + 1][0] if i + 1 < len(sorted_quarters) else normalized.index[-1]
-    mask = (normalized.index >= start) & (normalized.index <= end)
-    temp_data = normalized.loc[mask, weights.keys()]
-    composite.loc[mask] = (temp_data * pd.Series(weights)).sum(axis=1)
-
-# Scale the index to base value 1000
 composite = composite / composite.iloc[0] * 1000
 
-# Prepare the data in a format suitable for Chart.js (dates and index values)
-dates = composite.index.strftime('%Y-%m-%d').tolist()
-values = composite.tolist()
-
-# Save the data to a JSON file
-output_data = {"dates": dates, "values": values}
-
-with open('data.json', 'w') as json_file:
-    json.dump(output_data, json_file)
+# Save as JSON
+chart_data = {
+    "dates": [d.strftime("%Y-%m-%d") for d in composite.index],
+    "values": composite.round(2).tolist()
+}
+with open("data.json", "w") as f:
+    json.dump(chart_data, f)
