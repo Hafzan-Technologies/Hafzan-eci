@@ -1,3 +1,2 @@
-yfinance
-pandas
-matplotlib
+yfinance==0.2.24
+pandas==1.5.3
