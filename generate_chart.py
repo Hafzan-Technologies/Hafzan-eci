@@ -60,8 +60,8 @@ composite = composite / composite.iloc[0] * 1000
 
 # Plot using Matplotlib (Line Chart)
 plt.figure(figsize=(12, 6))
-plt.plot(composite.index, composite, label="Hafzan Composite Index", color="blue", linewidth=1.5)
-plt.title("Hafzan Composite Index", fontsize=16)
+plt.plot(composite.index, composite, label="Hafzan Equity Composite Index", color="blue", linewidth=2.0)
+plt.title("Hafzan Equity Composite Index", fontsize=16)
 plt.xlabel("Date")
 plt.ylabel("Index Value")
 plt.grid(True)
