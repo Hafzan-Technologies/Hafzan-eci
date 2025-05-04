@@ -1,55 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Hafzan Composite Index</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    canvas {
-      width: 100% !important;
-      max-width: 100%;
-      height: auto !important;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Hafzan Composite Index</title>
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-  <h2>Hafzan Composite Index</h2>
-  <canvas id="lineChart"></canvas>
+    <div style="width: 100%; height: 100vh;">
+        <h1>Hafzan Composite Index</h1>
+        <div id="chart"></div>
+    </div>
 
-  <script>
-    fetch("data.json")
-      .then(response => response.json())
-      .then(data => {
-        const ctx = document.getElementById("lineChart").getContext("2d");
-        new Chart(ctx, {
-          type: "line",
-          data: {
-            labels: data.dates,
-            datasets: [{
-              label: "Hafzan Composite Index",
-              data: data.values,
-              fill: false,
-              borderColor: "blue",
-              tension: 0.1
-            }]
-          },
-          options: {
-            responsive: true,
-            scales: {
-              x: {
-                ticks: { maxTicksLimit: 10 }
-              }
-            }
-          }
-        });
-      })
-      .catch(err => console.error("Error loading data.json", err));
-  </script>
+    <script>
+        // Fetch data from the data.json file
+        fetch("data.json")
+            .then(response => response.json())
+            .then(data => {
+                var trace = {
+                    x: data.dates, // Dates
+                    y: data.values, // Index values
+                    mode: 'lines',
+                    name: 'Hafzan Composite Index',
+                    line: {color: 'blue'}
+                };
+
+                var layout = {
+                    title: "Hafzan Composite Index",
+                    xaxis: {
+                        title: 'Date'
+                    },
+                    yaxis: {
+                        title: 'Index Value'
+                    },
+                    responsive: true,
+                    showlegend: false
+                };
+
+                var chartData = [trace];
+                Plotly.newPlot('chart', chartData, layout);
+            })
+            .catch(err => console.error("Error fetching the data: ", err));
+    </script>
 </body>
 </html>

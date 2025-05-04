@@ -1,8 +1,9 @@
 import yfinance as yf
 import pandas as pd
 import json
+import plotly.express as px  # For visualizing the data in Python (optional)
 
-# Quarterly weights starting from Q2 2025
+# Quarterly weights for the Hafzan Composite Index
 quarterly_weights = {
     "2025-04-01": {
         "PERSISTENT.NS": 0.0235,
@@ -32,19 +33,16 @@ quarterly_weights = {
 start_date = "2025-04-01"
 end_date = pd.Timestamp.today().strftime("%Y-%m-%d")
 
-# Get all tickers
-all_tickers = set()
+# Get tickers and download price data
+tickers = set()
 for weights in quarterly_weights.values():
-    all_tickers.update(weights.keys())
+    tickers.update(weights.keys())
+data = yf.download(list(tickers), start=start_date, end=end_date)["Close"].dropna()
 
-# Download data
-data = yf.download(list(all_tickers), start=start_date, end=end_date)["Close"].dropna()
-
-# Normalize
+# Normalize and calculate composite index
 normalized = data / data.iloc[0]
 composite = pd.Series(index=normalized.index, dtype=float)
 
-# Apply quarterly weights
 sorted_quarters = sorted((pd.to_datetime(k), v) for k, v in quarterly_weights.items())
 
 for i, (start, weights) in enumerate(sorted_quarters):
@@ -53,14 +51,21 @@ for i, (start, weights) in enumerate(sorted_quarters):
     temp_data = normalized.loc[mask, weights.keys()]
     composite.loc[mask] = (temp_data * pd.Series(weights)).sum(axis=1)
 
-# Scale to base 1000
 composite = composite / composite.iloc[0] * 1000
 
-# Export to JSON
+# Save to data.json
 output = {
-    "dates": [d.strftime("%Y-%m-%d") for d in composite.index],
-    "values": [round(v, 2) for v in composite.values]
+    "dates": composite.index.strftime("%Y-%m-%d").tolist(),
+    "values": composite.round(2).tolist()
 }
-
 with open("data.json", "w") as f:
     json.dump(output, f)
+
+# Optional: Save a Plotly graph to file (if you want to visualize it in Python as well)
+fig = px.line(
+    x=composite.index,
+    y=composite.values,
+    labels={'x': 'Date', 'y': 'Index Value'},
+    title="Hafzan Composite Index"
+)
+fig.write_html("chart.html")
