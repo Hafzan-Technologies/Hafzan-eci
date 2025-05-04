@@ -66,6 +66,6 @@ fig = px.line(
     x=composite.index,
     y=composite.values,
     labels={'x': 'Date', 'y': 'Index Value'},
-    title="Hafzan Composite Index"
+    title="Hafzan Equity Composite Index (HECI) Base - 1000"
 )
 fig.write_html("chart.html")
